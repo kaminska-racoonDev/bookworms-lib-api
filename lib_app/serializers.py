@@ -56,9 +56,13 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "user",
             "created_at",
         ]
-        read_only_fields = ["user", "actual_return_date",
-                            "estimated_money_to_pay",
-                            "days_before_return", "created_at"]
+        read_only_fields = [
+            "user",
+            "actual_return_date",
+            "estimated_money_to_pay",
+            "days_before_return",
+            "created_at"
+        ]
 
 
 class PaymentSerializer(serializers.ModelSerializer):
