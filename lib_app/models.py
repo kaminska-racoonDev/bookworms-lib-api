@@ -48,6 +48,10 @@ class Borrowing(models.Model):
 
         return (self.expected_return_date - datetime.date.today()).days
 
+    @property
+    def is_active(self):
+        return self.actual_return_date is None
+
     @staticmethod
     def validate_expected_return_date(
         expected_return_date: datetime,
