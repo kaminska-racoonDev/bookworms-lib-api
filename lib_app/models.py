@@ -40,7 +40,7 @@ class Borrowing(models.Model):
     def __str__(self):
         return (f"Borrowed book: {self.book_borrowed.title} "
                 f"- Return by {self.expected_return_date}")
-
+    
     @property
     def days_before_return(self):
         if self.actual_return_date:
@@ -66,10 +66,40 @@ class Borrowing(models.Model):
     def validate_book_inventory(book, error_to_raise):
         if book.inventory <= 0:
             raise error_to_raise(f"'{book.title}' is out of stock.")
+    
+    @staticmethod
+    def validate_pending_payments(user, error_to_raise):
+        has_pending_payments = Payment.objects.filter(
+            borrowing__user=user,
+            status=Payment.StatusText.PENDING
+        ).exists()
+
+        if has_pending_payments:
+            raise error_to_raise(
+                "You have pending payments. Complete them before borrowing a new book."
+            )
 
     def clean(self):
-        Borrowing.validate_expected_return_date(
-            self.expected_return_date, self.borrow_date, ValidationError
+        self.validate_expected_return_date(
+            self.expected_return_date,
+            self.borrow_date,
+            ValidationError,
+        )
+        
+        self.validate_pending_payments(
+            self.user,
+            ValidationError,
+        )
+        
+        self.validate_book_inventory(
+            self.book_borrowed,
+            ValidationError,
+        )
+    
+    def full_clean(self, exclude=None, validate_unique=True):
+        super().full_clean(
+            exclude=exclude,
+            validate_unique=validate_unique,
         )
 
     FINE_MULTIPLIER = 2
@@ -109,20 +139,17 @@ class Borrowing(models.Model):
     @property
     def estimated_money_to_pay(self):
         if self.actual_return_date:
-            # already returned — the estimate is settled, not a projection anymore
             base = self.calculate_payment()
             fine = self.calculate_fine() or 0
             return base + fine
 
         if datetime.date.today() > self.expected_return_date:
-            # currently overdue and still not returned — estimate fine as of today
             days_overdue = (datetime.date.today()
                             - self.expected_return_date).days
             projected_fine = self.book_borrowed.daily_fee * \
                 days_overdue * self.FINE_MULTIPLIER
             return self.calculate_payment() + projected_fine
 
-        # still within the expected window — just the base fee
         return self.calculate_payment()
 
 

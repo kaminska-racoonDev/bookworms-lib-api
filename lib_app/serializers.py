@@ -24,19 +24,6 @@ class BorrowingSerializer(serializers.ModelSerializer):
         queryset=Book.objects.all()
     )
 
-    def validate(self, attrs):
-        data = super(BorrowingSerializer, self).validate(attrs)
-        Borrowing.validate_expected_return_date(
-            attrs["expected_return_date"],
-            attrs["borrow_date"],
-            serializers.ValidationError
-        )
-        Borrowing.validate_book_inventory(
-            attrs["book_borrowed"],
-            serializers.ValidationError,
-        )
-        return data
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation["book_borrowed"] = BookSerializer(
