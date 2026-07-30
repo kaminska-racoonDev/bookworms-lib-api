@@ -20,14 +20,11 @@ class BookSerializer(serializers.ModelSerializer):
 
 
 class BorrowingSerializer(serializers.ModelSerializer):
-    book_borrowed = serializers.PrimaryKeyRelatedField(
-        queryset=Book.objects.all()
-    )
+    book_borrowed = serializers.PrimaryKeyRelatedField(queryset=Book.objects.all())
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        representation["book_borrowed"] = BookSerializer(
-            instance.book_borrowed).data
+        representation["book_borrowed"] = BookSerializer(instance.book_borrowed).data
         return representation
 
     class Meta:
@@ -48,7 +45,7 @@ class BorrowingSerializer(serializers.ModelSerializer):
             "actual_return_date",
             "estimated_money_to_pay",
             "days_before_return",
-            "created_at"
+            "created_at",
         ]
 
 

@@ -3,187 +3,127 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
 from rest_framework import status
-from lib_app.helpers import (
-    create_book,
-)
 
+from lib_app.helpers import create_book
 
 User = get_user_model()
 
 
-class BookUnauthTest(TestCase):
+class BookBaseTestClass(TestCase):
     def setUp(self):
         self.client = APIClient()
-
-    def test_book_list(self):
-        url = reverse("lib_app:book-list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_book_detail(self):
-        book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_book_create(self):
-        payload = {
+        self.list_url = reverse("lib_app:book-list")
+        self.payload = {
             "title": "1984",
             "author": "G. Orwell",
             "cover": "SOFT",
             "inventory": 2,
-            "daily_fee": 40.0
+            "daily_fee": 40.0,
         }
-        url = reverse("lib_app:book-list")
-        response = self.client.post(url, payload)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_update(self):
+    def detail_url(self, pk):
+        return reverse("lib_app:book-detail", kwargs={"pk": pk})
+
+
+class BookUnauthTest(BookBaseTestClass):
+    def test_book_list(self):
+        response = self.client.get(self.list_url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_book_detail(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        payload = {
-            "title": "1985",
-            "author": "J. Orwell",
-            "cover": "SOFT",
-            "inventory": 2,
-            "daily_fee": 40.0
-        }
-        response = self.client.put(url, payload)
+        response = self.client.get(self.detail_url(book.pk))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_book_create_forbidden(self):
+        response = self.client.post(self.list_url, self.payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_patch(self):
+    def test_book_update_forbidden(self):
         book = create_book()
-        payload = {
-            "inventory": 1
-        }
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.patch(url, payload)
+        response = self.client.put(self.detail_url(book.pk), self.payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_delete(self):
+    def test_book_patch_forbidden(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.delete(url)
+        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_book_delete_forbidden(self):
+        book = create_book()
+        response = self.client.delete(self.detail_url(book.pk))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class BookAuthTest(TestCase):
+class BookAuthTest(BookBaseTestClass):
     def setUp(self):
-        self.client = APIClient()
+        super().setUp()
         self.user = User.objects.create_user(
-            email="testuser@test.com",
-            password="testpass123"
+            email="testuser@test.com", password="testpass123"
         )
         self.client.force_authenticate(user=self.user)
 
     def test_book_list(self):
-        url = reverse("lib_app:book-list")
-        response = self.client.get(url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_detail(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.get(url)
+        response = self.client.get(self.detail_url(book.pk))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_book_create(self):
-        payload = {
-            "title": "1984",
-            "author": "G. Orwell",
-            "cover": "SOFT",
-            "inventory": 2,
-            "daily_fee": 40.0
-        }
-        url = reverse("lib_app:book-list")
-        response = self.client.post(url, payload)
+    def test_book_create_forbidden(self):
+        response = self.client.post(self.list_url, self.payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_update(self):
+    def test_book_update_forbidden(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        payload = {
-            "title": "1985",
-            "author": "J. Orwell",
-            "cover": "SOFT",
-            "inventory": 2,
-            "daily_fee": 40.0
-        }
-        response = self.client.put(url, payload)
+        response = self.client.put(self.detail_url(book.pk), self.payload)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_patch(self):
+    def test_book_patch_forbidden(self):
         book = create_book()
-        payload = {
-            "inventory": 1
-        }
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.patch(url, payload)
+        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_book_delete(self):
+    def test_book_delete_forbidden(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.delete(url)
+        response = self.client.delete(self.detail_url(book.pk))
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
-class BookAdminTest(TestCase):
+class BookAdminTest(BookBaseTestClass):
     def setUp(self):
-        self.client = APIClient()
+        super().setUp()
         self.user = User.objects.create_superuser(
-            email="admin@test.com",
-            password="admin.pass.test"
+            email="admin@test.com", password="admin.pass.test"
         )
         self.client.force_authenticate(user=self.user)
 
     def test_book_list(self):
-        url = reverse("lib_app:book-list")
-        response = self.client.get(url)
+        response = self.client.get(self.list_url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_detail(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.get(url)
+        response = self.client.get(self.detail_url(book.pk))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_create(self):
-        payload = {
-            "title": "1984",
-            "author": "G. Orwell",
-            "cover": "SOFT",
-            "inventory": 2,
-            "daily_fee": 40.0
-        }
-        url = reverse("lib_app:book-list")
-        response = self.client.post(url, payload)
+        response = self.client.post(self.list_url, self.payload)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_book_update(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        payload = {
-            "title": "1985",
-            "author": "J. Orwell",
-            "cover": "SOFT",
-            "inventory": 2,
-            "daily_fee": 40.0
-        }
-        response = self.client.put(url, payload)
+        response = self.client.put(self.detail_url(book.pk), self.payload)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_patch(self):
         book = create_book()
-        payload = {
-            "inventory": 1
-        }
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.patch(url, payload)
+        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_delete(self):
         book = create_book()
-        url = reverse("lib_app:book-detail", kwargs={"pk": book.pk})
-        response = self.client.delete(url)
+        response = self.client.delete(self.detail_url(book.pk))
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)

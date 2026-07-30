@@ -14,6 +14,4 @@ router.register("book", BookViewSet)
 router.register("borrowing", BorrowingViewSet, basename="borrowing")
 router.register("payments", PaymentViewSet, basename="payment")
 
-urlpatterns = [
-    path("", include(router.urls))
-]
+urlpatterns = [path("", include(router.urls))]

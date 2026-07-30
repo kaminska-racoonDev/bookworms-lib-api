@@ -16,6 +16,7 @@ from lib_app.models import (
 from rest_framework.permissions import IsAuthenticated
 from lib_app.permissions import (
     IsAdminOrReadOnly,
+    IsAdminOrIfAuthenticatedReadOnly,
 )
 
 
@@ -28,6 +29,7 @@ class BookViewSet(viewsets.ModelViewSet):
 class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingSerializer
     permission_classes = (IsAuthenticated,)
+    http_method_names = ["get", "post", "head", "options"]
 
     def get_queryset(self):
         user = self.request.user
@@ -78,13 +80,11 @@ class BorrowingViewSet(viewsets.ModelViewSet):
 
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    http_method_names = ["get", "head", "options"]
 
     def get_queryset(self):
         user = self.request.user
         if user.is_staff:
             return Payment.objects.all()
         return Payment.objects.filter(borrowing__user=user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)

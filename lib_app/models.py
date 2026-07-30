@@ -14,10 +14,7 @@ class Book(models.Model):
 
     title = models.CharField(max_length=255)
     author = models.CharField(max_length=255)
-    cover = models.CharField(
-        max_length=10,
-        choices=CoverType.choices
-    )
+    cover = models.CharField(max_length=10, choices=CoverType.choices)
     inventory = models.PositiveIntegerField()
     daily_fee = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -29,18 +26,16 @@ class Borrowing(models.Model):
     borrow_date = models.DateField()
     expected_return_date = models.DateField()
     actual_return_date = models.DateField(null=True, blank=True)
-    book_borrowed = models.ForeignKey(
-        Book, on_delete=models.CASCADE
-    )
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE
-    )
+    book_borrowed = models.ForeignKey(Book, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return (f"Borrowed book: {self.book_borrowed.title} "
-                f"- Return by {self.expected_return_date}")
-    
+        return (
+            f"Borrowed book: {self.book_borrowed.title} "
+            f"- Return by {self.expected_return_date}"
+        )
+
     @property
     def days_before_return(self):
         if self.actual_return_date:
@@ -54,24 +49,22 @@ class Borrowing(models.Model):
 
     @staticmethod
     def validate_expected_return_date(
-        expected_return_date: datetime,
-        borrow_date: datetime,
-        error_to_raise
+        expected_return_date: datetime, borrow_date: datetime, error_to_raise
     ):
         if expected_return_date < borrow_date:
             raise error_to_raise(
-                "Expected return date can't be before the borrow date.")
+                "Expected return date can't be before the borrow date."
+            )
 
     @staticmethod
     def validate_book_inventory(book, error_to_raise):
         if book.inventory <= 0:
             raise error_to_raise(f"'{book.title}' is out of stock.")
-    
+
     @staticmethod
     def validate_pending_payments(user, error_to_raise):
         has_pending_payments = Payment.objects.filter(
-            borrowing__user=user,
-            status=Payment.StatusText.PENDING
+            borrowing__user=user, status=Payment.StatusText.PENDING
         ).exists()
 
         if has_pending_payments:
@@ -85,17 +78,17 @@ class Borrowing(models.Model):
             self.borrow_date,
             ValidationError,
         )
-        
+
         self.validate_pending_payments(
             self.user,
             ValidationError,
         )
-        
+
         self.validate_book_inventory(
             self.book_borrowed,
             ValidationError,
         )
-    
+
     def full_clean(self, exclude=None, validate_unique=True):
         super().full_clean(
             exclude=exclude,
@@ -130,8 +123,7 @@ class Borrowing(models.Model):
     def calculate_fine(self):
         if not self.actual_return_date:
             return None
-        days_overdue = (self.actual_return_date
-                        - self.expected_return_date).days
+        days_overdue = (self.actual_return_date - self.expected_return_date).days
         if days_overdue <= 0:
             return None
         return self.book_borrowed.daily_fee * days_overdue * self.FINE_MULTIPLIER
@@ -144,10 +136,10 @@ class Borrowing(models.Model):
             return base + fine
 
         if datetime.date.today() > self.expected_return_date:
-            days_overdue = (datetime.date.today()
-                            - self.expected_return_date).days
-            projected_fine = self.book_borrowed.daily_fee * \
-                days_overdue * self.FINE_MULTIPLIER
+            days_overdue = (datetime.date.today() - self.expected_return_date).days
+            projected_fine = (
+                self.book_borrowed.daily_fee * days_overdue * self.FINE_MULTIPLIER
+            )
             return self.calculate_payment() + projected_fine
 
         return self.calculate_payment()
@@ -161,17 +153,10 @@ class Payment(models.Model):
     class PaymentType(models.TextChoices):
         PAYMENT = "PAYMENT"
         FINE = "FINE"
-    status = models.CharField(
-        max_length=10,
-        choices=StatusText.choices
-    )
-    type = models.CharField(
-        max_length=10,
-        choices=PaymentType.choices
-    )
-    borrowing = models.ForeignKey(
-        Borrowing, on_delete=models.CASCADE
-    )
+
+    status = models.CharField(max_length=10, choices=StatusText.choices)
+    type = models.CharField(max_length=10, choices=PaymentType.choices)
+    borrowing = models.ForeignKey(Borrowing, on_delete=models.CASCADE)
     session_id = models.CharField(max_length=255)
     session_url = models.URLField(null=True, blank=True)
     money_to_pay = models.DecimalField(max_digits=10, decimal_places=2)

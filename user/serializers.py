@@ -7,7 +7,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ("id", "email", "password", "is_staff")
-        read_only_fields = ("id", "is_staff",)
+        read_only_fields = (
+            "id",
+            "is_staff",
+        )
         extra_kwargs = {
             "password": {
                 "write_only": True,
@@ -46,9 +49,7 @@ class AuthTokenSerializer(serializers.Serializer):
 
         if email and password:
             user = authenticate(
-                request=self.context.get("request"),
-                email=email,
-                password=password
+                request=self.context.get("request"), email=email, password=password
             )
 
             if not user:
