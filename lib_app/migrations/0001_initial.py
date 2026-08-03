@@ -31,11 +31,15 @@ class Migration(migrations.Migration):
                 (
                     "cover",
                     models.CharField(
-                        choices=[("HARD", "Hard"), ("SOFT", "Soft")], max_length=10
+                        choices=[("HARD", "Hard"), ("SOFT", "Soft")],
+                        max_length=10,
                     ),
                 ),
                 ("inventory", models.PositiveIntegerField()),
-                ("daily_fee", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "daily_fee",
+                    models.DecimalField(decimal_places=2, max_digits=10),
+                ),
             ],
         ),
         migrations.CreateModel(
@@ -52,12 +56,16 @@ class Migration(migrations.Migration):
                 ),
                 ("borrow_date", models.DateField()),
                 ("expected_return_date", models.DateField()),
-                ("actual_return_date", models.DateField(blank=True, null=True)),
+                (
+                    "actual_return_date",
+                    models.DateField(blank=True, null=True),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "book_borrowed",
                     models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE, to="lib_app.book"
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="lib_app.book",
                     ),
                 ),
                 (
@@ -97,7 +105,10 @@ class Migration(migrations.Migration):
                 ),
                 ("session_id", models.CharField(max_length=255)),
                 ("session_url", models.URLField(blank=True, null=True)),
-                ("money_to_pay", models.DecimalField(decimal_places=2, max_digits=10)),
+                (
+                    "money_to_pay",
+                    models.DecimalField(decimal_places=2, max_digits=10),
+                ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
                 (
                     "borrowing",

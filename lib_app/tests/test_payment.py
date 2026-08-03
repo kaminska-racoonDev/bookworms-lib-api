@@ -81,7 +81,9 @@ class PaymentAuthTest(PaymentBaseTestClass):
     def test_payment_update_not_allowed(self):
         borrowing = create_borrowing(user=self.user)
         payment = borrowing.create_payment()
-        response = self.client.patch(self.detail_url(payment.pk), {"status": "PAID"})
+        response = self.client.patch(
+            self.detail_url(payment.pk), {"status": "PAID"}
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_payment_delete_not_allowed(self):
@@ -127,16 +129,24 @@ class PaymentAdminTest(PaymentBaseTestClass):
     def test_payment_create_not_allowed_even_for_admin(self):
         borrowing = create_borrowing()
         response = self.client.post(self.list_url, {"borrowing": borrowing.id})
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     def test_payment_update_not_allowed_even_for_admin(self):
         borrowing = create_borrowing()
         payment = borrowing.create_payment()
-        response = self.client.patch(self.detail_url(payment.pk), {"status": "PAID"})
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        response = self.client.patch(
+            self.detail_url(payment.pk), {"status": "PAID"}
+        )
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     def test_payment_delete_not_allowed_even_for_admin(self):
         borrowing = create_borrowing()
         payment = borrowing.create_payment()
         response = self.client.delete(self.detail_url(payment.pk))
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+        )

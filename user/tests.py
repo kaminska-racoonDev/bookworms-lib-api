@@ -18,7 +18,9 @@ class UserTests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     def test_login_access(self):
-        User.objects.create_user(email="usertest@test.com", password="testpass123")
+        User.objects.create_user(
+            email="usertest@test.com", password="testpass123"
+        )
         payload = {"email": "usertest@test.com", "password": "testpass123"}
         url = reverse("user:login")
         response = self.client.post(url, payload)
@@ -40,7 +42,9 @@ class UserTests(TestCase):
         self.assertEqual(response.data["email"], "usertest@test.com")
 
     def test_token_refresh(self):
-        User.objects.create_user(email="usertest@test.com", password="testpass123")
+        User.objects.create_user(
+            email="usertest@test.com", password="testpass123"
+        )
         login_response = self.client.post(
             reverse("user:login"),
             {"email": "usertest@test.com", "password": "testpass123"},

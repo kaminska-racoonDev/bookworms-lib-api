@@ -46,7 +46,9 @@ class BookUnauthTest(BookBaseTestClass):
 
     def test_book_patch_forbidden(self):
         book = create_book()
-        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
+        response = self.client.patch(
+            self.detail_url(book.pk), {"inventory": 1}
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_book_delete_forbidden(self):
@@ -83,7 +85,9 @@ class BookAuthTest(BookBaseTestClass):
 
     def test_book_patch_forbidden(self):
         book = create_book()
-        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
+        response = self.client.patch(
+            self.detail_url(book.pk), {"inventory": 1}
+        )
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_book_delete_forbidden(self):
@@ -120,7 +124,9 @@ class BookAdminTest(BookBaseTestClass):
 
     def test_book_patch(self):
         book = create_book()
-        response = self.client.patch(self.detail_url(book.pk), {"inventory": 1})
+        response = self.client.patch(
+            self.detail_url(book.pk), {"inventory": 1}
+        )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_book_delete(self):

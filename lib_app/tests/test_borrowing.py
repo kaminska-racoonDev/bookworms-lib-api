@@ -238,12 +238,16 @@ class BorrowingAuthTest(BorrowingBaseTestClass):
             self.detail_url(borrowing.pk),
             {"expected_return_date": "2026-12-31"},
         )
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
     def test_borrowing_delete_not_allowed(self):
         borrowing = create_borrowing(user=self.user)
         response = self.client.delete(self.detail_url(borrowing.pk))
-        self.assertEqual(response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertEqual(
+            response.status_code, status.HTTP_405_METHOD_NOT_ALLOWED
+        )
 
 
 class BorrowingAdminTest(BorrowingBaseTestClass):

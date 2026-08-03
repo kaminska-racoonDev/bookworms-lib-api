@@ -1,0 +1,221 @@
+[
+  {
+    "model": "user.user",
+    "pk": 1,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$replace_with_real_hash_1",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "testuser",
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "user@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-07-23T12:00:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+  {
+    "model": "user.user",
+    "pk": 2,
+    "fields": {
+      "password": "pbkdf2_sha256$1000000$replace_with_real_hash_2",
+      "last_login": null,
+      "is_superuser": false,
+      "username": "alice",
+      "first_name": "Alice",
+      "last_name": "Smith",
+      "email": "alice@example.com",
+      "is_staff": false,
+      "is_active": true,
+      "date_joined": "2026-07-23T12:05:00Z",
+      "groups": [],
+      "user_permissions": []
+    }
+  },
+
+  {
+    "model": "lib_app.book",
+    "pk": 1,
+    "fields": {
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "cover": "HARD",
+      "inventory": 5,
+      "daily_fee": "1.50"
+    }
+  },
+  {
+    "model": "lib_app.book",
+    "pk": 2,
+    "fields": {
+      "title": "1984",
+      "author": "George Orwell",
+      "cover": "SOFT",
+      "inventory": 3,
+      "daily_fee": "1.20"
+    }
+  },
+  {
+    "model": "lib_app.book",
+    "pk": 3,
+    "fields": {
+      "title": "Dune",
+      "author": "Frank Herbert",
+      "cover": "HARD",
+      "inventory": 4,
+      "daily_fee": "2.30"
+    }
+  },
+  {
+    "model": "lib_app.book",
+    "pk": 4,
+    "fields": {
+      "title": "Atomic Habits",
+      "author": "James Clear",
+      "cover": "SOFT",
+      "inventory": 7,
+      "daily_fee": "0.90"
+    }
+  },
+  {
+    "model": "lib_app.book",
+    "pk": 5,
+    "fields": {
+      "title": "Clean Code",
+      "author": "Robert C. Martin",
+      "cover": "HARD",
+      "inventory": 2,
+      "daily_fee": "2.00"
+    }
+  },
+
+  {
+    "model": "lib_app.borrowing",
+    "pk": 1,
+    "fields": {
+      "borrow_date": "2026-07-01",
+      "expected_return_date": "2026-07-15",
+      "actual_return_date": null,
+      "book_borrowed": 1,
+      "user": 1,
+      "created_at": "2026-07-01T10:00:00Z"
+    }
+  },
+  {
+    "model": "lib_app.borrowing",
+    "pk": 2,
+    "fields": {
+      "borrow_date": "2026-06-10",
+      "expected_return_date": "2026-06-24",
+      "actual_return_date": "2026-06-22",
+      "book_borrowed": 2,
+      "user": 1,
+      "created_at": "2026-06-10T09:00:00Z"
+    }
+  },
+  {
+    "model": "lib_app.borrowing",
+    "pk": 3,
+    "fields": {
+      "borrow_date": "2026-07-12",
+      "expected_return_date": "2026-07-26",
+      "actual_return_date": null,
+      "book_borrowed": 3,
+      "user": 1,
+      "created_at": "2026-07-12T14:20:00Z"
+    }
+  },
+  {
+    "model": "lib_app.borrowing",
+    "pk": 4,
+    "fields": {
+      "borrow_date": "2026-05-01",
+      "expected_return_date": "2026-05-15",
+      "actual_return_date": "2026-05-20",
+      "book_borrowed": 4,
+      "user": 2,
+      "created_at": "2026-05-01T11:30:00Z"
+    }
+  },
+  {
+    "model": "lib_app.borrowing",
+    "pk": 5,
+    "fields": {
+      "borrow_date": "2026-07-20",
+      "expected_return_date": "2026-08-03",
+      "actual_return_date": null,
+      "book_borrowed": 5,
+      "user": 2,
+      "created_at": "2026-07-20T08:15:00Z"
+    }
+  },
+
+  {
+    "model": "lib_app.payment",
+    "pk": 1,
+    "fields": {
+      "status": "PENDING",
+      "type": "PAYMENT",
+      "borrowing": 1,
+      "session_id": "cs_test_001",
+      "session_url": "https://checkout.stripe.com/pay/cs_test_001",
+      "money_to_pay": "21.00",
+      "created_at": "2026-07-01T10:05:00Z"
+    }
+  },
+  {
+    "model": "lib_app.payment",
+    "pk": 2,
+    "fields": {
+      "status": "PAID",
+      "type": "PAYMENT",
+      "borrowing": 2,
+      "session_id": "cs_test_002",
+      "session_url": "https://checkout.stripe.com/pay/cs_test_002",
+      "money_to_pay": "16.80",
+      "created_at": "2026-06-22T15:00:00Z"
+    }
+  },
+  {
+    "model": "lib_app.payment",
+    "pk": 3,
+    "fields": {
+      "status": "PENDING",
+      "type": "PAYMENT",
+      "borrowing": 3,
+      "session_id": "cs_test_003",
+      "session_url": "https://checkout.stripe.com/pay/cs_test_003",
+      "money_to_pay": "32.20",
+      "created_at": "2026-07-12T14:30:00Z"
+    }
+  },
+  {
+    "model": "lib_app.payment",
+    "pk": 4,
+    "fields": {
+      "status": "PAID",
+      "type": "FINE",
+      "borrowing": 4,
+      "session_id": "cs_test_004",
+      "session_url": "https://checkout.stripe.com/pay/cs_test_004",
+      "money_to_pay": "7.50",
+      "created_at": "2026-05-20T18:00:00Z"
+    }
+  },
+  {
+    "model": "lib_app.payment",
+    "pk": 5,
+    "fields": {
+      "status": "PENDING",
+      "type": "PAYMENT",
+      "borrowing": 5,
+      "session_id": "cs_test_005",
+      "session_url": "https://checkout.stripe.com/pay/cs_test_005",
+      "money_to_pay": "28.00",
+      "created_at": "2026-07-20T08:20:00Z"
+    }
+  }
+]

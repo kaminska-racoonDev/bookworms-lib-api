@@ -3,6 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 from rest_framework import viewsets
+from drf_spectacular.utils import (
+    extend_schema,
+    extend_schema_view,
+    OpenApiParameter,
+)
 from lib_app.serializers import (
     BookSerializer,
     BorrowingSerializer,
@@ -20,12 +25,54 @@ from lib_app.permissions import (
 )
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List books",
+        description="Returns all books in the catalog. Read access is open to everyone; "
+        "create/update/delete require admin rights.",
+    ),
+    retrieve=extend_schema(summary="Retrieve a book"),
+    create=extend_schema(summary="Add a new book (admin only)"),
+    update=extend_schema(summary="Update a book (admin only)"),
+    partial_update=extend_schema(
+        summary="Partially update a book (admin only)"
+    ),
+    destroy=extend_schema(summary="Delete a book (admin only)"),
+)
 class BookViewSet(viewsets.ModelViewSet):
     serializer_class = BookSerializer
     queryset = Book.objects.all()
     permission_classes = (IsAdminOrReadOnly,)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List borrowings",
+        description="Regular users see only their own borrowings. Staff see all borrowings "
+        "and can filter by `user_id`.",
+        parameters=[
+            OpenApiParameter(
+                name="user_id",
+                type=int,
+                description="Filter by user ID (staff only).",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="is_active",
+                type=str,
+                description="Filter by active status: 'true' for not yet returned, "
+                "'false' for already returned.",
+                required=False,
+            ),
+        ],
+    ),
+    retrieve=extend_schema(summary="Retrieve a borrowing"),
+    create=extend_schema(
+        summary="Create a borrowing",
+        description="Creates a borrowing for the authenticated user, decrements book "
+        "inventory, and generates a payment.",
+    ),
+)
 class BorrowingViewSet(viewsets.ModelViewSet):
     serializer_class = BorrowingSerializer
     permission_classes = (IsAuthenticated,)
@@ -56,6 +103,18 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         borrowing.book_borrowed.save()
         borrowing.create_payment()
 
+    @extend_schema(
+        summary="Return a borrowed book",
+        description="Marks the borrowing as returned, restores book inventory by 1, "
+        "and creates a return payment if applicable.",
+        request=None,
+        responses={
+            200: BorrowingSerializer,
+            400: OpenApiParameter(
+                name="detail", type=str, description="Already returned."
+            ),
+        },
+    )
     @action(detail=True, methods=["post"], url_path="return")
     def return_borrowing(self, request, pk=None):
         borrowing = self.get_object()
@@ -78,6 +137,14 @@ class BorrowingViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        summary="List payments",
+        description="Regular authenticated users see only their own payments. "
+        "Admins see all payments.",
+    ),
+    retrieve=extend_schema(summary="Retrieve a payment"),
+)
 class PaymentViewSet(viewsets.ModelViewSet):
     serializer_class = PaymentSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)

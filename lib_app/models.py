@@ -69,7 +69,7 @@ class Borrowing(models.Model):
 
         if has_pending_payments:
             raise error_to_raise(
-                "You have pending payments. Complete them before borrowing a new book."
+                "You have pending payments. Pay them before borrowing new book."
             )
 
     def clean(self):
@@ -123,10 +123,14 @@ class Borrowing(models.Model):
     def calculate_fine(self):
         if not self.actual_return_date:
             return None
-        days_overdue = (self.actual_return_date - self.expected_return_date).days
+        days_overdue = (
+            self.actual_return_date - self.expected_return_date
+        ).days
         if days_overdue <= 0:
             return None
-        return self.book_borrowed.daily_fee * days_overdue * self.FINE_MULTIPLIER
+        return (
+            self.book_borrowed.daily_fee * days_overdue * self.FINE_MULTIPLIER
+        )
 
     @property
     def estimated_money_to_pay(self):
@@ -136,9 +140,13 @@ class Borrowing(models.Model):
             return base + fine
 
         if datetime.date.today() > self.expected_return_date:
-            days_overdue = (datetime.date.today() - self.expected_return_date).days
+            days_overdue = (
+                datetime.date.today() - self.expected_return_date
+            ).days
             projected_fine = (
-                self.book_borrowed.daily_fee * days_overdue * self.FINE_MULTIPLIER
+                self.book_borrowed.daily_fee
+                * days_overdue
+                * self.FINE_MULTIPLIER
             )
             return self.calculate_payment() + projected_fine
 
