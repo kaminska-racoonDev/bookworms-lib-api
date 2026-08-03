@@ -29,15 +29,15 @@ A browsable API for local library management.
 ## Endpoints:
 1. `admin/` - Admin panel
 2. `api/v1/user/` - User management (registration, login, account)
-    2.1. `me/` - Account view
-    2.2. `login/` - Authentication for registered user
-    2.3. `register/` - Registration of new user
-    2.4. `token/refresh/` - Generating new token when last one's session has ended
+    - `me/` - Account view
+    - `login/` - Authentication for registered user
+    - `register/` - Registration of new user
+    - `token/refresh/` - Generating new token when last one's session has ended
 3. `api/v1/lib_app/`
-    3.1. `book/` - Book list
-    3.2. `borrowing/` - Borrowing list
-        3.2.1 `return/` - Return borrowing
-    3.3. `payments/` - Payment list
+    - `book/` - Book list
+    - `borrowing/` - Borrowing list
+        - `return/` - Return borrowing
+    - `payments/` - Payment list
 4. `api/v1/doc/` - downloadable documentation that may be used in Postman
 5. `api/v1/doc/swagger/` - Swagger documentation
 6. `api-auth/` - Registration for testing in Browsable API used in development
