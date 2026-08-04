@@ -37,24 +37,24 @@ class BookUnauthTest(BookBaseTestClass):
 
     def test_book_create_forbidden(self):
         response = self.client.post(self.list_url, self.payload)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_book_update_forbidden(self):
         book = create_book()
         response = self.client.put(self.detail_url(book.pk), self.payload)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_book_patch_forbidden(self):
         book = create_book()
         response = self.client.patch(
             self.detail_url(book.pk), {"inventory": 1}
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_book_delete_forbidden(self):
         book = create_book()
         response = self.client.delete(self.detail_url(book.pk))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class BookAuthTest(BookBaseTestClass):

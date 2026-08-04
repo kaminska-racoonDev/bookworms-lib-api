@@ -21,17 +21,17 @@ class PaymentBaseTestClass(TestCase):
 class PaymentUnauthTest(PaymentBaseTestClass):
     def test_payment_list_forbidden(self):
         response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_payment_detail_forbidden(self):
         borrowing = create_borrowing()
         payment = borrowing.create_payment()
         response = self.client.get(self.detail_url(payment.pk))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_payment_create_not_allowed(self):
         response = self.client.post(self.list_url, {})
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class PaymentAuthTest(PaymentBaseTestClass):

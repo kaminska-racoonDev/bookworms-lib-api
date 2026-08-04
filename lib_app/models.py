@@ -1,10 +1,13 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 import datetime
+import stripe
+from django.conf import settings
 
 from jsonschema import ValidationError
 
 User = get_user_model()
+stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 class Book(models.Model):
@@ -102,23 +105,27 @@ class Borrowing(models.Model):
         return self.book_borrowed.daily_fee * expected_days
 
     def create_payment(self):
-        return Payment.objects.create(
+        payment = Payment.objects.create(
             borrowing=self,
             type=Payment.PaymentType.PAYMENT,
             status=Payment.StatusText.PENDING,
             money_to_pay=self.calculate_payment(),
         )
+        payment.create_stripe_session()
+        return payment
 
     def create_return_payment(self):
         fine_amount = self.calculate_fine()
         if fine_amount is None:
             return None
-        return Payment.objects.create(
+        payment = Payment.objects.create(
             borrowing=self,
             type=Payment.PaymentType.FINE,
             status=Payment.StatusText.PENDING,
             money_to_pay=fine_amount,
         )
+        payment.create_stripe_session()
+        return payment
 
     def calculate_fine(self):
         if not self.actual_return_date:
@@ -172,3 +179,37 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Payment {self.id} - {self.status}"
+
+    def create_stripe_session(self):
+        product_name = (
+            f"{self.get_type_display()} for"
+            f"'{self.borrowing.book_borrowed.title}'"
+        )
+
+        success_url = (
+            settings.APP_BASE_URL
+            + "/api/v1/lib_app/payments/success/?session_id={CHECKOUT_SESSION_ID}"
+        )
+        cancel_url = settings.APP_BASE_URL + "/api/v1/lib_app/payments/cancel/"
+
+        session = stripe.checkout.Session.create(
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {"name": product_name},
+                        "unit_amount": int(self.money_to_pay * 100),
+                    },
+                    "quantity": 1,
+                }
+            ],
+            mode="payment",
+            success_url=success_url,
+            cancel_url=cancel_url,
+        )
+        self.session_id = session.id
+        self.session_url = session.url
+        self.save()
+
+        return session

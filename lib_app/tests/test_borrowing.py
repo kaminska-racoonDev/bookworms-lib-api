@@ -27,12 +27,12 @@ class BorrowingBaseTestClass(TestCase):
 class BorrowingUnauthTest(BorrowingBaseTestClass):
     def test_borrowing_list(self):
         response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_borrowing_detail(self):
         borrowing = create_borrowing()
         response = self.client.get(self.detail_url(borrowing.pk))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_borrowing_create_forbidden(self):
         book = create_book()
@@ -43,12 +43,12 @@ class BorrowingUnauthTest(BorrowingBaseTestClass):
                 "book_borrowed": book.id,
             },
         )
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_borrowing_return_forbidden(self):
         borrowing = create_borrowing()
         response = self.client.post(self.return_url(borrowing.pk))
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class BorrowingAuthTest(BorrowingBaseTestClass):
