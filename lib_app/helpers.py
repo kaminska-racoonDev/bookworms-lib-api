@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import patch, MagicMock
 import uuid
 
 from django.contrib.auth import get_user_model
@@ -44,3 +45,17 @@ def create_borrowing(
         book_borrowed=book_borrowed,
         user=user,
     )
+
+
+def make_payment_with_session(session_id="cs_test_confirm"):
+    """Helper: creates a Payment with a Stripe session already mocked in."""
+    with patch("lib_app.models.stripe.checkout.Session.create") as mock_create:
+        mock_session = MagicMock()
+        mock_session.id = session_id
+        mock_session.url = f"https://checkout.stripe.com/pay/{session_id}"
+        mock_create.return_value = mock_session
+
+        borrowing = create_borrowing()
+        payment = borrowing.create_payment()
+
+    return payment

@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.utils import timezone
 from rest_framework import viewsets
+from rest_framework.views import APIView
 from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
@@ -18,7 +19,7 @@ from lib_app.models import (
     Borrowing,
     Payment,
 )
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from lib_app.permissions import (
     IsAdminOrReadOnly,
     IsAdminOrIfAuthenticatedReadOnly,
@@ -155,3 +156,37 @@ class PaymentViewSet(viewsets.ModelViewSet):
         if user.is_staff:
             return Payment.objects.all()
         return Payment.objects.filter(borrowing__user=user)
+
+
+class PaymentSuccessView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        session_id = request.query_params.get("session_id")
+        if not session_id:
+            return Response(
+                {"detail": "Missing session_id."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        payment = Payment.confirm_from_session(session_id)
+        if payment is None:
+            return Response(
+                {"detail": "Payment not found or not completed."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response(
+            {"detail": "Payment successful.", "payment_id": payment.id},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PaymentCancelView(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request):
+        return Response(
+            {"detail": "Payment was cancelled."},
+            status=status.HTTP_200_OK,
+        )

@@ -213,3 +213,26 @@ class Payment(models.Model):
         self.save()
 
         return session
+
+    def mark_as_paid(self):
+        self.status = self.StatusText.PAID
+        self.save()
+
+    @classmethod
+    def confirm_from_session(cls, session_id):
+        """
+        Fetches the Stripe session and marks the matching Payment PAID
+        if Stripe confirms it was actually paid.
+        """
+        session = stripe.checkout.Session.retrieve(session_id)
+
+        if session.payment_status != "paid":
+            return None
+
+        try:
+            payment = cls.objects.get(session_id=session_id)
+        except cls.DoesNotExist:
+            return None
+
+        payment.mark_as_paid()
+        return payment
